@@ -121,6 +121,35 @@
       padding: 1px 5px;
     }
   }
+button {
+  font-size: 16px;
+  padding: 6px 12px;
+  margin-left: 8px;
+  cursor: pointer;
+  border: 1px solid #888;
+  border-radius: 6px;
+  background: white;
+  color: black;
+  touch-action: manipulation;
+}
+
+canvas {
+  image-rendering: pixelated;
+  transform-origin: top left;
+}
+
+.canvas-wrap.zoomed {
+  overflow: auto;
+  max-width: 100%;
+  height: calc(100vh - 140px);
+}
+
+.canvas-wrap.zoomed canvas {
+  width: 16000px;
+  height: 16000px;
+  max-width: none;
+}
+
 </style>
 </head>
 <body>
@@ -130,7 +159,7 @@
     <label for="ruleInput">Rule</label>
     <input id="ruleInput" type="number" min="0" max="255" step="1"
            value="90" inputmode="numeric">
-  </div>
+  <button id="zoomButton" type="button">拡大する</button></div>
 
   <div class="rule-info">
     <div class="binary">
@@ -165,6 +194,9 @@ const decimalRule = document.getElementById("decimalRule");
 const binaryRule = document.getElementById("binaryRule");
 const ruleHeading = document.getElementById("ruleHeading");
 const ruleTableBody = document.getElementById("ruleTableBody");
+const zoomButton = document.getElementById("zoomButton");
+const canvasWrap = document.querySelector(".canvas-wrap");
+let zoomed = false;
 
 const WIDTH = 2000;
 const HEIGHT = 2000;
@@ -268,6 +300,26 @@ ruleInput.addEventListener("keydown", event => {
   if (event.key === "Enter") {
     update();
     ruleInput.blur();
+  }
+});
+
+zoomButton.addEventListener("click", () => {
+  zoomed = !zoomed;
+  canvasWrap.classList.toggle("zoomed", zoomed);
+  zoomButton.textContent = zoomed ? "戻す(広域を表示）" : "拡大する";
+
+  // 拡大解除時は左上へ戻す
+  if (!zoomed) {
+    canvasWrap.scrollLeft = 0;
+    canvasWrap.scrollTop = 0;
+  } else {
+    // 初期セル（中央上部）が見える位置へ移動
+    requestAnimationFrame(() => {
+      const scale = 8;
+      const centerX = (WIDTH / 2) * scale;
+      canvasWrap.scrollLeft = Math.max(0, centerX - canvasWrap.clientWidth / 2);
+      canvasWrap.scrollTop = 0;
+    });
   }
 });
 
