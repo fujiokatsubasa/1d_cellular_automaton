@@ -306,7 +306,7 @@ ruleInput.addEventListener("keydown", event => {
 zoomButton.addEventListener("click", () => {
   zoomed = !zoomed;
   canvasWrap.classList.toggle("zoomed", zoomed);
-  zoomButton.textContent = zoomed ? "戻す(広域を表示）" : "拡大する";
+  zoomButton.textContent = zoomed ? "戻す(広域を表示)" : "拡大する";
 
   // 拡大解除時は左上へ戻す
   if (!zoomed) {
