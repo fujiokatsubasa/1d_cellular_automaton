@@ -150,16 +150,33 @@ canvas {
   max-width: none;
 }
 
+
+.rule-input { display:flex; align-items:flex-start; gap:8px; }
+.rule-inputs { display:flex; flex-direction:column; gap:5px; }
+.input-row { display:grid; grid-template-columns:58px 90px; align-items:center; gap:6px; }
+.input-row label { font-size:18px; font-weight:600; }
+.input-row input { width:90px; font-size:18px; padding:4px 6px; }
+#zoomButton { margin-top:3px; }
 </style>
 </head>
 <body>
 
 <div class="top-area">
   <div class="rule-input">
-    <label for="ruleInput">Rule</label>
-    <input id="ruleInput" type="number" min="0" max="255" step="1"
-           value="90" inputmode="numeric">
-  <button id="zoomButton" type="button">拡大する</button></div>
+    <div class="rule-inputs">
+      <div class="input-row">
+        <label for="ruleInput">Rule</label>
+        <input id="ruleInput" type="number" min="0" max="255" step="1"
+               value="90" inputmode="numeric">
+      </div>
+      <div class="input-row">
+        <label for="binaryInput">2進数</label>
+        <input id="binaryInput" type="text" value="01011010"
+               inputmode="numeric" maxlength="8">
+      </div>
+    </div>
+    <button id="zoomButton" type="button">拡大する</button>
+  </div>
 
   <div class="rule-info">
     <div class="binary">
@@ -195,6 +212,7 @@ const binaryRule = document.getElementById("binaryRule");
 const ruleHeading = document.getElementById("ruleHeading");
 const ruleTableBody = document.getElementById("ruleTableBody");
 const zoomButton = document.getElementById("zoomButton");
+const binaryInput = document.getElementById("binaryInput");
 const canvasWrap = document.querySelector(".canvas-wrap");
 let zoomed = false;
 
@@ -234,6 +252,7 @@ function updateRuleInfo(rule) {
 
   decimalRule.textContent = rule;
   binaryRule.textContent = bits;
+  binaryInput.value = bits;
   ruleHeading.textContent = "Rule " + rule;
 
   ruleTableBody.innerHTML = "";
@@ -303,10 +322,32 @@ ruleInput.addEventListener("keydown", event => {
   }
 });
 
+
+function updateFromBinary() {
+  let bits = binaryInput.value.replace(/[^01]/g, "").slice(0, 8);
+  if (bits.length === 0) bits = "0";
+  const rule = parseInt(bits, 2);
+  ruleInput.value = rule;
+  updateRuleInfo(rule);
+  draw(rule);
+}
+
+binaryInput.addEventListener("input", () => {
+  binaryInput.value = binaryInput.value.replace(/[^01]/g, "").slice(0, 8);
+});
+
+binaryInput.addEventListener("change", updateFromBinary);
+binaryInput.addEventListener("keydown", event => {
+  if (event.key === "Enter") {
+    updateFromBinary();
+    binaryInput.blur();
+  }
+});
+
 zoomButton.addEventListener("click", () => {
   zoomed = !zoomed;
   canvasWrap.classList.toggle("zoomed", zoomed);
-  zoomButton.textContent = zoomed ? "戻す(広域を表示)" : "拡大する";
+  zoomButton.textContent = zoomed ? "戻す" : "拡大する";
 
   // 拡大解除時は左上へ戻す
   if (!zoomed) {
